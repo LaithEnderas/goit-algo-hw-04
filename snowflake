@@ -1,0 +1,59 @@
+
+import turtle
+
+# рекурсивна функція для відрізка кривої коха
+def koch_segment(t, length, level):
+    # якщо рівень нульовий - малюємо пряму
+    if level == 0:
+        t.forward(length)
+        return
+    # інакше ділимо відрізок на 4 частини і малюємо рекурсивно
+    length /= 3.0
+    koch_segment(t, length, level - 1)
+    t.left(60)
+    koch_segment(t, length, level - 1)
+    t.right(120)
+    koch_segment(t, length, level - 1)
+    t.left(60)
+    koch_segment(t, length, level - 1)
+
+# малюємо три сторони сніжинки
+def draw_snowflake(level):
+    # налаштовуємо екран
+    screen = turtle.Screen()
+    screen.setup(width=900, height=700)
+    screen.title("сніжинка коха")
+
+    t = turtle.Turtle()
+    t.hideturtle()
+    t.speed(0)
+    t.penup()
+    t.goto(-250, 150)
+    t.pendown()
+
+    # підбираємо довжину сторони під рівень рекурсії щоб влізло в екран
+    base = 420 * (0.78 ** level)
+
+    for _ in range(3):
+        koch_segment(t, base, level)
+        t.right(120)
+
+    # чекаємо кліку щоб закрити вікно
+    print("натисніть на вікно, щоб закрити")
+    screen.exitonclick()
+
+def main():
+    # просимо користувача ввести рівень рекурсії
+    try:
+        level_str = input("вкажіть рівень рекурсії: ціле число від 0 і вище (не рекомендується ставити вище за 5): ").strip()
+        level = int(level_str)
+        if level < 0:
+            raise ValueError
+    except Exception:
+        print("помилка введення рівня рекурсії")
+        return
+
+    draw_snowflake(level)
+
+if __name__ == "__main__":
+    main()
