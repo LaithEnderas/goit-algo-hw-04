@@ -1,0 +1,63 @@
+import os
+import sys
+import shutil
+
+def parse_args():
+    # парсинг аргументів командного рядка
+    # використання: python copy_sort_files.py <source_dir> [destination_dir]
+    # якщо шлях до директорії призначення не вказаний - використовується 'dist'
+    if len(sys.argv) < 2:
+        print("помилка: потрібно вказати шлях до вихідної директорії")
+        sys.exit(1)
+
+    source_dir = sys.argv[1]
+    dest_dir = sys.argv[2] if len(sys.argv) > 2 else "dist"
+    return source_dir, dest_dir
+
+
+def copy_files_recursively(source_dir, dest_dir):
+    # рекурсивно обходить директорії і копіює файли у піддиректорії за розширенням
+    try:
+        for item in os.listdir(source_dir):
+            src_path = os.path.join(source_dir, item)
+
+            # якщо елемент - директорія, викликаємо функцію рекурсивно
+            if os.path.isdir(src_path):
+                copy_files_recursively(src_path, dest_dir)
+
+            # якщо елемент - файл, копіюємо у відповідну підпапку
+            elif os.path.isfile(src_path):
+                ext = os.path.splitext(item)[1][1:] or "no_extension"
+                target_folder = os.path.join(dest_dir, ext)
+                os.makedirs(target_folder, exist_ok=True)
+
+                try:
+                    shutil.copy2(src_path, target_folder)
+                    print(f"скопійовано {src_path} → {target_folder}")
+                except Exception as e:
+                    print(f"помилка копіювання {src_path}: {e}")
+
+    except PermissionError:
+        print(f"немає доступу до {source_dir}")
+    except FileNotFoundError:
+        print(f"не знайдено директорію {source_dir}")
+    except Exception as e:
+        print(f"помилка при обробці {source_dir}: {e}")
+
+
+def main():
+    source_dir, dest_dir = parse_args()
+
+    if not os.path.exists(source_dir):
+        print(f"вихідна директорія '{source_dir}' не існує")
+        sys.exit(1)
+
+    os.makedirs(dest_dir, exist_ok=True)
+
+    print(f"починаємо копіювання з {source_dir} у {dest_dir}")
+    copy_files_recursively(source_dir, dest_dir)
+    print("усі файли скопійовані та розсортовані за розширеннями")
+
+
+if __name__ == "__main__":
+    main()
